@@ -23,6 +23,42 @@
 " }}}
 " Interface  "{{{1
 function! textobj#smarty#select_a()  "{{{2
+  " Code example:
+  "
+  "     A
+  "     {if X}
+  "       B
+  "       {if Y}
+  "         C
+  "       {/if}
+  "       D
+  "     {else}
+  "       E
+  "       {if Z1}
+  "         F1
+  "       {/if}
+  "       F2
+  "       {if Z2}
+  "         F3
+  "       {/if}
+  "       G
+  "     {/if}
+  "     H
+  "
+  " ---------------------
+  " cursor | expected | -
+  " ---------------------
+  " A      | -        | -
+  " B      | X        | -
+  " C      | Y        | -
+  " D      | X        | -
+  " E      | X        | -
+  " F1     | Z1       | -
+  " F2     | X        | -
+  " F3     | Z2       | -
+  " G      | X        | -
+  " H      | -        | -
+  " ---------------------
   return 0
 endfunction
 
