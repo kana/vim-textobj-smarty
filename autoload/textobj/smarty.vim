@@ -24,7 +24,7 @@
 " Interface  "{{{1
 function! textobj#smarty#select_a()  "{{{2
   let head = s:search_head()
-  if head[0] == 0 || head[1] == 0
+  if head < 1
     return 0
   endif
   let head_first = getpos('.')
@@ -32,7 +32,7 @@ function! textobj#smarty#select_a()  "{{{2
   normal! l
 
   let tail = s:search_tail()
-  if tail[0] == 0 || tail[1] == 0
+  if tail < 1
     return 0
   endif
 
@@ -58,7 +58,7 @@ endfunction
 
 function! s:select_i()
   let head = s:search_head()
-  if head[0] == 0 || head[1] == 0
+  if head < 1
     return 0
   endif
 
@@ -66,7 +66,7 @@ function! s:select_i()
   let inner_first = getpos('.')
 
   let tail = s:search_tail()
-  if tail[0] == 0 || tail[1] == 0
+  if tail < 1
     return 0
   endif
 
@@ -85,14 +85,14 @@ endfunction
 
 " Misc.  "{{{1
 function! s:search_head()  "{{{2
-  return searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}\zs', 'bcW')
+  return searchpair('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}\zs', 'bcW')
 endfunction
 
 
 
 
 function! s:search_tail()  "{{{2
-  return searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}', 'cW')
+  return searchpair('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}', 'cW')
 endfunction
 
 
