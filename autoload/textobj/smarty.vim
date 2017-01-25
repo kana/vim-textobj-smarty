@@ -23,7 +23,7 @@
 " }}}
 " Interface  "{{{1
 function! textobj#smarty#select_a()  "{{{2
-  let head = searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}\zs', 'bcW')
+  let head = s:search_head()
   if head[0] == 0 || head[1] == 0
     return 0
   endif
@@ -31,7 +31,7 @@ function! textobj#smarty#select_a()  "{{{2
 
   normal! l
 
-  let tail = searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}', 'cW')
+  let tail = s:search_tail()
   if tail[0] == 0 || tail[1] == 0
     return 0
   endif
@@ -57,7 +57,7 @@ function! textobj#smarty#select_i()  "{{{2
 endfunction
 
 function! s:select_i()
-  let head = searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}\zs', 'bcW')
+  let head = s:search_head()
   if head[0] == 0 || head[1] == 0
     return 0
   endif
@@ -65,7 +65,7 @@ function! s:select_i()
   normal! %l
   let inner_first = getpos('.')
 
-  let tail = searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}', 'cW')
+  let tail = s:search_tail()
   if tail[0] == 0 || tail[1] == 0
     return 0
   endif
@@ -84,6 +84,16 @@ endfunction
 
 
 " Misc.  "{{{1
+function! s:search_head()  "{{{2
+  return searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}\zs', 'bcW')
+endfunction
+
+
+
+
+function! s:search_tail()  "{{{2
+  return searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}', 'cW')
+endfunction
 
 
 
