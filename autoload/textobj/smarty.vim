@@ -46,7 +46,34 @@ endfunction
 
 
 function! textobj#smarty#select_i()  "{{{2
-  return 0
+  let original_whichwrap = &whichwrap
+  let &whichwrap = 'h,l'
+
+  let result = s:select_i()
+
+  let &whichwrap = original_whichwrap
+
+  return result
+endfunction
+
+function! s:select_i()
+  let head = searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}\zs', 'bcW')
+  if head[0] == 0 || head[1] == 0
+    return 0
+  endif
+
+  normal! %l
+  let inner_first = getpos('.')
+
+  let tail = searchpairpos('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}', 'cW')
+  if tail[0] == 0 || tail[1] == 0
+    return 0
+  endif
+
+  normal! h
+  let inner_last = getpos('.')
+
+  return ['v', inner_first, inner_last]
 endfunction
 
 
