@@ -1,7 +1,7 @@
 filetype plugin indent on
 
 function! GetLastSelection()
-  return [visualmode(), line("'<"), col("'<"), line("'>"), col("'>")]
+  return [visualmode(), line("'["), col("'["), line("']"), col("']")]
 endfunction
 
 describe 'vim-textobj-smarty'
@@ -14,12 +14,13 @@ describe 'vim-textobj-smarty'
   end
 
   it 'targets a one-liner block characterwise'
-    /new/
+    normal! gg
+    call search('new')
 
-    normal! vak
+    normal yak
     Expect GetLastSelection() == ['v', 7, 7, 7, 36]
 
-    normal! vik
+    normal yik
     Expect GetLastSelection() == ['v', 7, 21, 7, 31]
   end
 end
