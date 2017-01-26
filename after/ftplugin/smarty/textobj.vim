@@ -55,7 +55,7 @@ TextobjSmartyDefaultKeyMappings
 
 let b:undo_ftplugin =
 \ (exists('b:undo_ftplugin') ? ' | ' : '')
-\ . 'unmap <buffer> ak | unmap <buffer> ik'
+\ . 'execute "unmap <buffer> ak" | execute "unmap <buffer> ik"'
 
 " __END__
 " vim: foldmethod=marker
