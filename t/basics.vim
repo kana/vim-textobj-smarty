@@ -56,4 +56,20 @@ describe 'vim-textobj-smarty'
     Expect Do('i', 18, 13) ==# ['v', 17,  1, 18,  8]
     Expect Do('i', 19,  1) !=# ['v', 17,  1, 18,  8]
   end
+
+  it 'targets a right block from nested blocks'
+    Expect Do('a', 14,  6) ==# ['v', 12,  5, 27,  9]
+    Expect Do('a', 14,  7) ==# ['v', 14,  7, 25, 11]
+    Expect Do('a', 16,  8) ==# ['v', 14,  7, 25, 11]
+    Expect Do('a', 16,  9) ==# ['v', 16,  9, 18, 13]
+    Expect Do('a', 19,  9) ==# ['v', 14,  7, 25, 11]
+    Expect Do('a', 26,  7) ==# ['v', 12,  5, 27,  9]
+
+    Expect Do('i', 14,  6) ==# ['v', 13,  1, 27,  4]
+    Expect Do('i', 14,  7) ==# ['v', 15,  1, 25,  6]
+    Expect Do('i', 16,  8) ==# ['v', 15,  1, 25,  6]
+    Expect Do('i', 16,  9) ==# ['v', 17,  1, 18,  8]
+    Expect Do('i', 19,  9) ==# ['v', 15,  1, 25,  6]
+    Expect Do('i', 26,  7) ==# ['v', 13,  1, 27,  4]
+  end
 end
