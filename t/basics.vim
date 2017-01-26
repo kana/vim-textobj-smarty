@@ -42,4 +42,18 @@ describe 'vim-textobj-smarty'
     Expect Do('i',  7, 36) ==# ['v',  7, 21,  7, 31]
     Expect Do('i',  7, 37) !=# ['v',  7, 21,  7, 31]
   end
+
+  it 'targets a multi-line, innermost block characterwise'
+    Expect Do('a', 16,  8) !=# ['v', 16,  9, 18, 13]
+    Expect Do('a', 16,  9) ==# ['v', 16,  9, 18, 13]
+    Expect Do('a', 17, 11) ==# ['v', 16,  9, 18, 13]
+    Expect Do('a', 18, 13) ==# ['v', 16,  9, 18, 13]
+    Expect Do('a', 19,  1) !=# ['v', 16,  9, 18, 13]
+
+    Expect Do('i', 16,  8) !=# ['v', 17,  1, 18,  8]
+    Expect Do('i', 16,  9) ==# ['v', 17,  1, 18,  8]
+    Expect Do('i', 17, 11) ==# ['v', 17,  1, 18,  8]
+    Expect Do('i', 18, 13) ==# ['v', 17,  1, 18,  8]
+    Expect Do('i', 19,  1) !=# ['v', 17,  1, 18,  8]
+  end
 end
