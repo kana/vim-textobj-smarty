@@ -90,4 +90,28 @@ describe 'vim-textobj-smarty'
     Expect Do('i', 34,  5) ==# ['v', 30,  1, 35,  4]
     Expect Do('i', 35,  5) ==# ['v', 30,  1, 35,  4]
   end
+
+  it 'targets a {if} block with {else} and {elseif}'
+    Expect Do('a', 37,  5) ==# ['v', 37,  5, 46,  9]
+    Expect Do('a', 38,  5) ==# ['v', 37,  5, 46,  9]
+    Expect Do('a', 39,  5) ==# ['v', 37,  5, 46,  9]
+    Expect Do('a', 40,  5) ==# ['v', 37,  5, 46,  9]
+    Expect Do('a', 41,  5) ==# ['v', 37,  5, 46,  9]
+    Expect Do('a', 42,  5) ==# ['v', 37,  5, 46,  9]
+    Expect Do('a', 43,  5) ==# ['v', 37,  5, 46,  9]
+    Expect Do('a', 44,  5) ==# ['v', 37,  5, 46,  9]
+    Expect Do('a', 45,  5) ==# ['v', 37,  5, 46,  9]
+    Expect Do('a', 46,  5) ==# ['v', 37,  5, 46,  9]
+
+    Expect Do('i', 37,  5) ==# ['v', 38,  1, 46,  4]
+    Expect Do('i', 38,  5) ==# ['v', 38,  1, 46,  4]
+    Expect Do('i', 39,  5) ==# ['v', 38,  1, 46,  4]
+    Expect Do('i', 40,  5) ==# ['v', 38,  1, 46,  4]
+    Expect Do('i', 41,  5) ==# ['v', 38,  1, 46,  4]
+    Expect Do('i', 42,  5) ==# ['v', 38,  1, 46,  4]
+    Expect Do('i', 43,  5) ==# ['v', 38,  1, 46,  4]
+    Expect Do('i', 44,  5) ==# ['v', 38,  1, 46,  4]
+    Expect Do('i', 45,  5) ==# ['v', 38,  1, 46,  4]
+    Expect Do('i', 46,  5) ==# ['v', 38,  1, 46,  4]
+  end
 end
