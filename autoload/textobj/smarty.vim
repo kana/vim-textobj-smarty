@@ -156,15 +156,13 @@ function! s:_select()
     " Try moving the cursor to a proper {xxx}.
     call setpos('.', pos)
     while !0
-      let e = search('{/\k\+}', 'W')
-      if e == 0
+      if search('{/\k\+}', 'W') == 0
         return 0
       endif
       let e = getpos('.')
 
       normal! llyiw
-      let b = s:search_mate(@0, 0)
-      if b == 0
+      if s:search_mate(@0, 0) == 0
         return 0
       endif
       let b = getpos('.')
