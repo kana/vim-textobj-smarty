@@ -23,7 +23,12 @@
 " }}}
 " Interface  "{{{1
 function! textobj#smarty#select_a()  "{{{2
-  return s:select()
+  let result = s:select()
+  if result is 0
+    return 0
+  endif
+
+  return result[0]
 endfunction
 
 
@@ -45,7 +50,11 @@ function! s:select_i()
     return 0
   endif
 
-  let [v, outer_first, outer_last] = result
+  let [positions, has_mate] = result
+  let [v, outer_first, outer_last] = positions
+  if !has_mate
+    return positions
+  endif
 
   call setpos('.', outer_first)
   normal! %l
@@ -189,7 +198,7 @@ function! s:_select()
     let tail_last = p1l
   endif
 
-  return ['v', head_first, tail_last]
+  return [['v', head_first, tail_last], has_mate]
 endfunction
 
 

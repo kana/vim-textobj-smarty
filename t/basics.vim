@@ -167,4 +167,9 @@ describe 'vim-textobj-smarty'
 
     Expect result ==# original
   end
+
+  it 'targets only {include}'
+    Expect Do('a', 57, 12) ==# ['v', 57,  9, 57, 34]
+    Expect Do('i', 57, 12) ==# ['v', 57,  9, 57, 34]
+  end
 end
