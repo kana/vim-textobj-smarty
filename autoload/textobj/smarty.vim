@@ -23,21 +23,60 @@
 " }}}
 " Interface  "{{{1
 function! textobj#smarty#select_a()  "{{{2
-  let head = s:search_head()
-  if head < 1
+  " TODO: Keep registers.
+  let pos = getpos('.')
+
+  " === Adjust the cursor to `{xxx}` or `{/xxx}` if necessary.
+
+  let @0 = ''
+  normal! yaB
+  let token = @0
+  let b = getpos("'[")
+  let e = getpos("']")
+  if !(token =~# '{.*}' && s:between(b, pos, e))
+    call setpos('.', pos)
+    " TODO: Implement.
     return 0
   endif
-  let head_first = getpos('.')
 
-  normal! l
+  " === Find the mate `{xxx}` or `{/xxx}` to `token`.
 
-  let tail = s:search_tail()
-  if tail < 1
-    return 0
-  endif
-
+  let p1f = getpos('.')
   normal! %
-  let tail_last = getpos('.')
+  let p1l = getpos('.')
+  normal! %lyl
+  let is_head = @0 !=# '/'
+  if is_head
+    normal! yiw
+  else
+    normal! lyiw
+  endif
+  let raw_name = @0
+  let name = s:normalize_mate_name(raw_name)
+
+  " Adjust the cursor to `{if}` from `{else}` if necessary.
+  if raw_name !=# name
+    if s:search_mate(name, 0) == 0
+      " `{else}` is written without `{if}` or `{/if}`.
+      " This template seems to be broken.  Cancel the current selection.
+      return 0
+    endif
+    let p1f = getpos('.')
+    normal! %
+    let p1l = getpos('.')
+  endif
+
+  let has_mate = s:search_mate(name, is_head) != 0
+  if has_mate
+    let p2f = getpos('.')
+    normal! %
+    let p2l = getpos('.')
+    let head_first = is_head ? p1f : p2f
+    let tail_last = is_head ? p2l : p1l
+  else
+    let head_first = p1f
+    let tail_last = p1l
+  endif
 
   return ['v', head_first, tail_last]
 endfunction
@@ -84,6 +123,39 @@ endfunction
 
 
 " Misc.  "{{{1
+function! s:between(b, p, e)  "{{{2
+  return a:b[1] <= a:p[1] && a:p[1] <= a:e[1] &&
+  \      a:b[2] <= a:p[2] && a:p[2] <= a:e[2]
+endfunction
+
+
+
+
+function! s:normalize_mate_name(name)  "{{{2
+  return get(s:MATE_NAME_MAP, a:name, a:name)
+endfunction
+
+let s:MATE_NAME_MAP = {
+\   'else': 'if',
+\   'elseif': 'if',
+\   'sectionelse': 'section',
+\   'foreachelse': 'foreach',
+\ }
+
+
+
+
+function! s:search_mate(name, to_forward)  "{{{2
+  if a:to_forward
+    return searchpair('{' . a:name . '\>', '', '{/' . a:name . '}', 'cW')
+  else
+    return searchpair('{' . a:name . '\>', '', '{/' . a:name . '}\zs', 'bcW')
+  endif
+endfunction
+
+
+
+
 function! s:search_head()  "{{{2
   return searchpair('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}\zs', 'bcW')
 endfunction
@@ -91,8 +163,12 @@ endfunction
 
 
 
-function! s:search_tail()  "{{{2
-  return searchpair('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}', 'cW')
+function! s:search_tail(...)  "{{{2
+  if a:0 == 0
+    return searchpair('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}', 'cW')
+  else
+    return searchpair('{'.a:1.'\s', '', '{/'.a:1.'}', 'cW')
+  endif
 endfunction
 
 
