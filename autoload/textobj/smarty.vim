@@ -57,11 +57,21 @@ function! s:select_i()
   endif
 
   call setpos('.', outer_first)
-  normal! %l
+  normal! %
+  if v ==# 'V'
+    normal! j
+  else
+    normal! l
+  endif
   let inner_first = getpos('.')
 
   call setpos('.', outer_last)
-  normal! %h
+  normal! %
+  if v ==# 'V'
+    normal! k
+  else
+    normal! h
+  endif
   let inner_last = getpos('.')
 
   return [v, inner_first, inner_last]
@@ -78,6 +88,19 @@ endfunction
 function! s:between(b, p, e)  "{{{2
   return (a:b[1] < a:p[1] || a:b[1] == a:p[1] && a:b[2] <= a:p[2])
   \   && (a:p[1] < a:e[1] || a:p[1] == a:e[1] && a:p[2] <= a:e[2])
+endfunction
+
+
+
+
+function! s:is_inlined(f, l)  "{{{2
+  call setpos('.', a:f)
+  let f = searchpos('^\s*\zs', 'bcnW')
+
+  call setpos('.', a:l)
+  let l = searchpos('\ze\s*$', 'cnW')
+
+  return f != a:f[1:2] && l != a:l[1:2]
 endfunction
 
 
@@ -189,6 +212,7 @@ function! s:_select()
     let p2l = getpos('.')
     let head_first = is_head ? p1f : p2f
     let tail_last = is_head ? p2l : p1l
+    let v = !s:is_inlined(p1f, p1l) && !s:is_inlined(p2f, p2l) ? 'V' : 'v'
   else
     if !is_head
       " {/xxx} is written without {xxx}.  This template is broken.
@@ -196,9 +220,10 @@ function! s:_select()
     endif
     let head_first = p1f
     let tail_last = p1l
+    let v = 'v'
   endif
 
-  return [['v', head_first, tail_last], has_mate]
+  return [[v, head_first, tail_last], has_mate]
 endfunction
 
 
