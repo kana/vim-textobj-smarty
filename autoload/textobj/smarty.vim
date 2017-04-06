@@ -26,7 +26,7 @@ function! textobj#smarty#select_a()  "{{{2
   " TODO: Keep registers.
   let pos = getpos('.')
 
-  " === Adjust the cursor to `{xxx}` or `{/xxx}` if necessary.
+  " (1) Ensure that the cursor is located on {xxx} or {/xxx}.
 
   let @0 = ''
   normal! yaB
@@ -34,12 +34,32 @@ function! textobj#smarty#select_a()  "{{{2
   let b = getpos("'[")
   let e = getpos("']")
   if !(token =~# '{.*}' && s:between(b, pos, e))
+    " The cursor is located on neither {xxx} nor {/xxx},
+    " but it might be located between {xxx} and {/xxx}.
+    " Try moving the cursor to a proper {xxx}.
     call setpos('.', pos)
-    " TODO: Implement.
-    return 0
+    while !0
+      let e = search('{/\k\+}', 'W')
+      if e == 0
+        return 0
+      endif
+      let e = getpos('.')
+
+      normal! llyiw
+      let b = s:search_mate(@0, 0)
+      if b == 0
+        return 0
+      endif
+      let b = getpos('.')
+
+      if s:between(b, pos, e)
+        break
+      endif
+      call setpos('.', e)
+    endwhile
   endif
 
-  " === Find the mate `{xxx}` or `{/xxx}` to `token`.
+  " (2) Check which of {xxx} and {/xxx} is under the cursor.
 
   let p1f = getpos('.')
   normal! %
@@ -54,17 +74,19 @@ function! textobj#smarty#select_a()  "{{{2
   let raw_name = @0
   let name = s:normalize_mate_name(raw_name)
 
-  " Adjust the cursor to `{if}` from `{else}` if necessary.
+  " (3) Adjust the cursor to {if} if the cursor is located on {else}.
+
   if raw_name !=# name
     if s:search_mate(name, 0) == 0
-      " `{else}` is written without `{if}` or `{/if}`.
-      " This template seems to be broken.  Cancel the current selection.
+      " {else} is written without {if} or {/if}.  This template is broken.
       return 0
     endif
     let p1f = getpos('.')
     normal! %
     let p1l = getpos('.')
   endif
+
+  " (4) Select {single} or {block}-{/block}.
 
   let has_mate = s:search_mate(name, is_head) != 0
   if has_mate
@@ -74,6 +96,10 @@ function! textobj#smarty#select_a()  "{{{2
     let head_first = is_head ? p1f : p2f
     let tail_last = is_head ? p2l : p1l
   else
+    if !is_head
+      " {/xxx} is written without {xxx}.  This template is broken.
+      return 0
+    endif
     let head_first = p1f
     let tail_last = p1l
   endif
@@ -124,8 +150,8 @@ endfunction
 
 " Misc.  "{{{1
 function! s:between(b, p, e)  "{{{2
-  return a:b[1] <= a:p[1] && a:p[1] <= a:e[1] &&
-  \      a:b[2] <= a:p[2] && a:p[2] <= a:e[2]
+  return (a:b[1] < a:p[1] || a:b[1] == a:p[1] && a:b[2] <= a:p[2])
+  \   && (a:p[1] < a:e[1] || a:p[1] == a:e[1] && a:p[2] <= a:e[2])
 endfunction
 
 
