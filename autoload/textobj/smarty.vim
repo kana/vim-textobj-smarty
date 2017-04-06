@@ -23,7 +23,13 @@
 " }}}
 " Interface  "{{{1
 function! textobj#smarty#select_a()  "{{{2
-  " TODO: Keep registers.
+  let [r0, r0t] = [@0, getregtype('0')]
+  let result = s:select_a()
+  call setreg('0', r0, r0t)
+  return result
+endfunction
+
+function! s:select_a()  "{{{2
   let pos = getpos('.')
 
   " (1) Ensure that the cursor is located on {xxx} or {/xxx}.

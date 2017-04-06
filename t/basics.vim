@@ -152,4 +152,19 @@ describe 'vim-textobj-smarty'
     " TODO: Expect Do('i', 63,  5) ==# ['v', 49,  1, 64,  4]
     " TODO: Expect Do('i', 64,  5) ==# ['v', 49,  1, 64,  4]
   end
+
+  it 'does not have any side effect on registers'
+    redir => original
+    registers
+    redir END
+
+    call cursor(7, 11)
+    normal vak
+
+    redir => result
+    registers
+    redir END
+
+    Expect result ==# original
+  end
 end
