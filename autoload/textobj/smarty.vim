@@ -23,15 +23,92 @@
 " }}}
 " Interface  "{{{1
 function! textobj#smarty#select_a()  "{{{2
+  return s:select()
+endfunction
+
+
+
+
+function! textobj#smarty#select_i()  "{{{2
+  let original_whichwrap = &whichwrap
+  let &whichwrap = 'h,l'
+
+  let result = s:select_i()
+
+  let &whichwrap = original_whichwrap
+  return result
+endfunction
+
+function! s:select_i()
+  let result = s:select()
+  if result is 0
+    return 0
+  endif
+
+  let [v, outer_first, outer_last] = result
+
+  call setpos('.', outer_first)
+  normal! %l
+  let inner_first = getpos('.')
+
+  call setpos('.', outer_last)
+  normal! %h
+  let inner_last = getpos('.')
+
+  return [v, inner_first, inner_last]
+endfunction
+
+
+
+
+
+
+
+
+" Misc.  "{{{1
+function! s:between(b, p, e)  "{{{2
+  return (a:b[1] < a:p[1] || a:b[1] == a:p[1] && a:b[2] <= a:p[2])
+  \   && (a:p[1] < a:e[1] || a:p[1] == a:e[1] && a:p[2] <= a:e[2])
+endfunction
+
+
+
+
+function! s:normalize_mate_name(name)  "{{{2
+  return get(s:MATE_NAME_MAP, a:name, a:name)
+endfunction
+
+let s:MATE_NAME_MAP = {
+\   'else': 'if',
+\   'elseif': 'if',
+\   'sectionelse': 'section',
+\   'foreachelse': 'foreach',
+\ }
+
+
+
+
+function! s:search_mate(name, to_forward)  "{{{2
+  if a:to_forward
+    return searchpair('{' . a:name . '\>', '', '{/' . a:name . '}', 'cW')
+  else
+    return searchpair('{' . a:name . '\>', '', '{/' . a:name . '}\zs', 'bcW')
+  endif
+endfunction
+
+
+
+
+function! s:select()  "{{{2
   let [r0, r0t] = [@0, getregtype('0')]
 
-  let result = s:select_a()
+  let result = s:_select()
 
   call setreg('0', r0, r0t)
   return result
 endfunction
 
-function! s:select_a()  "{{{2
+function! s:_select()
   let pos = getpos('.')
 
   " (1) Ensure that the cursor is located on {xxx} or {/xxx}.
@@ -113,76 +190,6 @@ function! s:select_a()  "{{{2
   endif
 
   return ['v', head_first, tail_last]
-endfunction
-
-
-
-
-function! textobj#smarty#select_i()  "{{{2
-  let original_whichwrap = &whichwrap
-  let &whichwrap = 'h,l'
-
-  let result = s:select_i()
-
-  let &whichwrap = original_whichwrap
-  return result
-endfunction
-
-function! s:select_i()
-  let result = textobj#smarty#select_a()
-  if result is 0
-    return 0
-  endif
-
-  let [v, outer_first, outer_last] = result
-
-  call setpos('.', outer_first)
-  normal! %l
-  let inner_first = getpos('.')
-
-  call setpos('.', outer_last)
-  normal! %h
-  let inner_last = getpos('.')
-
-  return [v, inner_first, inner_last]
-endfunction
-
-
-
-
-
-
-
-
-" Misc.  "{{{1
-function! s:between(b, p, e)  "{{{2
-  return (a:b[1] < a:p[1] || a:b[1] == a:p[1] && a:b[2] <= a:p[2])
-  \   && (a:p[1] < a:e[1] || a:p[1] == a:e[1] && a:p[2] <= a:e[2])
-endfunction
-
-
-
-
-function! s:normalize_mate_name(name)  "{{{2
-  return get(s:MATE_NAME_MAP, a:name, a:name)
-endfunction
-
-let s:MATE_NAME_MAP = {
-\   'else': 'if',
-\   'elseif': 'if',
-\   'sectionelse': 'section',
-\   'foreachelse': 'foreach',
-\ }
-
-
-
-
-function! s:search_mate(name, to_forward)  "{{{2
-  if a:to_forward
-    return searchpair('{' . a:name . '\>', '', '{/' . a:name . '}', 'cW')
-  else
-    return searchpair('{' . a:name . '\>', '', '{/' . a:name . '}\zs', 'bcW')
-  endif
 endfunction
 
 
