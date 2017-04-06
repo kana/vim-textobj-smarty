@@ -37,7 +37,7 @@ function! s:select_a()  "{{{2
   " (1) Ensure that the cursor is located on {xxx} or {/xxx}.
 
   let @0 = ''
-  normal! yaB
+  silent! normal! yaB
   let token = @0
   let b = getpos("'[")
   let e = getpos("']")
