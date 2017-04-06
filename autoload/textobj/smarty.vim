@@ -24,7 +24,9 @@
 " Interface  "{{{1
 function! textobj#smarty#select_a()  "{{{2
   let [r0, r0t] = [@0, getregtype('0')]
+
   let result = s:select_a()
+
   call setreg('0', r0, r0t)
   return result
 endfunction
@@ -123,28 +125,26 @@ function! textobj#smarty#select_i()  "{{{2
   let result = s:select_i()
 
   let &whichwrap = original_whichwrap
-
   return result
 endfunction
 
 function! s:select_i()
-  let head = s:search_head()
-  if head < 1
+  let result = textobj#smarty#select_a()
+  if result is 0
     return 0
   endif
 
+  let [v, outer_first, outer_last] = result
+
+  call setpos('.', outer_first)
   normal! %l
   let inner_first = getpos('.')
 
-  let tail = s:search_tail()
-  if tail < 1
-    return 0
-  endif
-
-  normal! h
+  call setpos('.', outer_last)
+  normal! %h
   let inner_last = getpos('.')
 
-  return ['v', inner_first, inner_last]
+  return [v, inner_first, inner_last]
 endfunction
 
 
@@ -182,24 +182,6 @@ function! s:search_mate(name, to_forward)  "{{{2
     return searchpair('{' . a:name . '\>', '', '{/' . a:name . '}', 'cW')
   else
     return searchpair('{' . a:name . '\>', '', '{/' . a:name . '}\zs', 'bcW')
-  endif
-endfunction
-
-
-
-
-function! s:search_head()  "{{{2
-  return searchpair('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}\zs', 'bcW')
-endfunction
-
-
-
-
-function! s:search_tail(...)  "{{{2
-  if a:0 == 0
-    return searchpair('{\k\+\s\&\%({else\)\@!', '', '{/\k\+}', 'cW')
-  else
-    return searchpair('{'.a:1.'\s', '', '{/'.a:1.'}', 'cW')
   endif
 endfunction
 
